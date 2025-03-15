@@ -1,0 +1,44 @@
+# Игнорировать скомпилированные файлы Scala
+*.class
+*.log
+
+# Игнорировать директории, созданные сборщиками (sbt, Maven, Gradle)
+target/
+project/target
+project/project
+dist/
+*.jar
+*.war
+*.ear
+
+# Игнорировать файлы, созданные IDE
+.idea/
+.bsp/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+bin/
+
+# Игнорировать файлы, созданные SBT
+.metals/
+.bloop/
+.metals.sbt
+
+# Игнорировать файлы, созданные Spark
+spark-warehouse/
+derby.log
+
+# Игнорировать файлы, созданные Git
+*.orig
+
+# Игнорировать файлы, созданные операционной системой
+.DS_Store
+
+# Игнорировать файлы, созданные пользователем
+*.swp
+*.swo
+*~
