@@ -1,4 +1,4 @@
-package extract
+package t1.datamarts.extract
 
 import org.apache.spark.sql._
 import org.apache.log4j.{Level, Logger}
@@ -10,13 +10,13 @@ import schemas._
 import Variables._
 
 
-
 class Extract extends Function with Logging{
 
   // настройка логирования
     Logger.getRootLogger.setLevel(Level.WARN)
     val logger: Logger = Logger.getLogger(getClass.getName)
     logger.setLevel(Level.INFO)
+
 
   log.warn("Загрузка источников")
 
@@ -44,6 +44,7 @@ class Extract extends Function with Logging{
   val fctLoanAccountBalanceExtr: DataFrame =
     extractTable("FCT_LOAN_ACCOUNT_BALANCE", fctLoanAccountBalanceSchema, ";", fctLoanAccountBalanceTable,
       fctLoanAccountBalanceCol, col("DELETED_FLG") =!= 1 && col("BALANCE_AMT") > 0)
+      .filter(year(to_date(col("PROCESSED_DTTM"))) === 2020)
 
   val techLoanRepaymentScheduleDF: DataFrame =
     extractTable("TECH_LOAN_REPAYMENT_SCHEDULE", techLoanRepaymentScheduleSchema, ";",
