@@ -8,6 +8,7 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.types._
 import schemas._
 import Variables._
+import t1.datamarts.Parameters
 
 
 class Extract extends Function with Logging{
@@ -17,6 +18,11 @@ class Extract extends Function with Logging{
     val logger: Logger = Logger.getLogger(getClass.getName)
     logger.setLevel(Level.INFO)
 
+  // аргументы необходимо при запуске jar передавать с ним, здесь объявлены для демонстрации работы
+  val args = Seq("--load-date", "2020")
+  val conf = new Parameters(args)
+
+  log.warn(s"Получена дата ${conf.loadDate.apply()}")
 
   log.warn("Загрузка источников")
 
@@ -44,7 +50,9 @@ class Extract extends Function with Logging{
   val fctLoanAccountBalanceExtr: DataFrame =
     extractTable("FCT_LOAN_ACCOUNT_BALANCE", fctLoanAccountBalanceSchema, ";", fctLoanAccountBalanceTable,
       fctLoanAccountBalanceCol, col("DELETED_FLG") =!= 1 && col("BALANCE_AMT") > 0)
-      .filter(year(to_date(col("PROCESSED_DTTM"))) === 2020)
+      .withColumn("TRANZACTION_DATE", year(to_date(col("PROCESSED_DTTM"))))
+        .filter(col("TRANZACTION_DATE") === conf.loadDate.apply())
+
 
   val techLoanRepaymentScheduleDF: DataFrame =
     extractTable("TECH_LOAN_REPAYMENT_SCHEDULE", techLoanRepaymentScheduleSchema, ";",

@@ -4,8 +4,10 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.spark.internal.Logging
 import t1.datamarts.extract.Connect
 import t1.datamarts.processes.Processes._
+import t1.datamarts.transform.Transform
 
-object Main extends Logging with Connect {
+
+object Main extends Connect {
 
   // настройка логирования
   Logger.getRootLogger.setLevel(Level.WARN)
@@ -15,19 +17,17 @@ object Main extends Logging with Connect {
 
   def main(args: Array[String]): Unit = {
 
+    val start = new Transform
+    start.run()
 
-
-    fctLoanAccountBalanceProc.show()
-    cdAccountProc.show()
-    cdLoanAgreementProc.show()
-    cdAgreementXCustomerProc.show()
-    cdIndividualCustomerProc.show()
-    cdGlobalIndividualCustomerProc.show()
-    techLoanRepaymentScheduleProc.show()
-    cdInternalOrgDetailProc.show()
-
-
-
+//    fctLoanAccountBalanceProc.show()
+//    cdAccountProc.show()
+//    cdLoanAgreementProc.show()
+//    cdAgreementXCustomerProc.show()
+//    cdIndividualCustomerProc.show()
+//    cdGlobalIndividualCustomerProc.show()
+//    techLoanRepaymentScheduleProc.show()
+//    cdInternalOrgDetailProc.show()
 
 
     //    val popGroupDF: DataFrame = Seq(
