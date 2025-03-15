@@ -5,22 +5,27 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.internal.Logging
 import extract.Connect
 import extract.Extract
+import processes.Processes._
 
 
-object Main extends Logging with Connect {
+object Main extends Logging with Connect{
+
+  // настройка логирования
+  Logger.getRootLogger.setLevel(Level.WARN)
+  val logger: Logger = Logger.getLogger(getClass.getName)
+  logger.setLevel(Level.INFO)
+
   def main(args: Array[String]): Unit = {
 
+    fctLoanAccountBalanceProc.show()
+    cdAccountProc.show()
+    cdLoanAgreementProc.show()
+    cdAgreementXCustomerProc.show()
+    cdIndividualCustomerProc.show()
+    cdGlobalIndividualCustomerProc.show()
+    techLoanRepaymentScheduleProc.show()
+    cdInternalOrgDetailProc.show()
 
-    val dl = new Extract()
-
-    dl.cdAccountDF.show()
-    dl.cdLoanAgreementDF.show()
-    dl.cdAgreementXCustomerDF.show()
-    dl.cdIndividualCustomerDF.show()
-    dl.cdGlobalIndividualCustomerDF.show()
-    dl.fctLoanAccountBalanceDF.show()
-    dl.techLoanRepaymentScheduleDF.show()
-    dl.cdInternalOrgDetailDF.show()
 
 
 

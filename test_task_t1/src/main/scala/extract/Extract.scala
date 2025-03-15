@@ -13,68 +13,45 @@ import Variables._
 
 class Extract extends Function with Logging{
 
+  // настройка логирования
     Logger.getRootLogger.setLevel(Level.WARN)
     val logger: Logger = Logger.getLogger(getClass.getName)
     logger.setLevel(Level.INFO)
 
   log.warn("Загрузка источников")
 
-  val cdAccountSchema = schemas.CdAccount.structType
-
   val cdAccountDF: DataFrame =
-    extractTable("CD_ACCOUNT", cdAccountSchema, ";", "sources/cd_account.csv",
-      cdAccountCol,
+    extractTable("CD_ACCOUNT", cdAccountSchema, ";", cdAccountTable, cdAccountCol,
       col("CUSTOMER_TYPE_CD") === "Ч" && col("ACCOUNT_TYPE_CD") === "А" && col("IS_ACTIVE_FLG") === 1)
 
-  val cdLoanAgreementSchema = schemas.CdLoanAgreement.structType
-
   val cdLoanAgreementDF: DataFrame =
-    extractTable("CD_LOAN_AGREEMENT", cdLoanAgreementSchema, ";", "sources/cd_loan_agreement.csv",
-      cdLoanAgreementCol,
+    extractTable("CD_LOAN_AGREEMENT", cdLoanAgreementSchema, ";", cdLoanAgreementTable, cdLoanAgreementCol,
       col("CUSTOMER_TYPE_CD") === "Ч" && col("CONTRACT_TYPE_CD") != "ЗАЯВКА" && col("IS_ACTIVE_FLG") === 1)
 
-  val cdAgreementXCustomerSchema = schemas.CdAgreementXCustomer.structType
-
-    // ошибка в ТЗ  - CUSTOMER_ROLE_CD=’ЗАЕМЩИК’ есть только Заемщик
+    // ошибка в ТЗ или неточность - CUSTOMER_ROLE_CD=’ЗАЕМЩИК’ в источнике формат "Заемщик"
   val cdAgreementXCustomerDF: DataFrame =
-    extractTable("CD_AGREEMENT_X_CUSTOMER", cdAgreementXCustomerSchema, ";", "sources/cd_agreement_x_customer.csv",
-      cdAgreementXCustomerCol,
+    extractTable("CD_AGREEMENT_X_CUSTOMER", cdAgreementXCustomerSchema, ";", cdAgreementXCustomerTable, cdAgreementXCustomerCol,
       col("CUSTOMER_TYPE_CD") === "Ч" && lower(col("CUSTOMER_ROLE_CD")) === "заемщик" && col("IS_ACTIVE_FLG") === 1)
 
-  val cdIndividualCustomerSchema = schemas.CdIndividualCustomer.structType
-
   val cdIndividualCustomerDF: DataFrame =
-    extractTable("CD_INDIVIDUAL_CUSTOMER", cdIndividualCustomerSchema, ";", "sources/cd_individual_customer.csv",
-      cdIndividualCustomerCol,
+    extractTable("CD_INDIVIDUAL_CUSTOMER", cdIndividualCustomerSchema, ";", cdIndividualCustomerTable, cdIndividualCustomerCol,
       col("IS_ACTIVE_FLG") === 1)
-
-  val CdGlobalIndividualCustomerSchema = schemas.CdGlobalIndividualCustomer.structType
 
   val cdGlobalIndividualCustomerDF: DataFrame =
-    extractTable("CD_GLOBAL_INDIVIDUAL_CUSTOMER", CdGlobalIndividualCustomerSchema, ";", "sources/cd_global_individual_customer.csv",
-      CdGlobalIndividualCustomerCol,
-      col("IS_ACTIVE_FLG") === 1)
+    extractTable("CD_GLOBAL_INDIVIDUAL_CUSTOMER", CdGlobalIndividualCustomerSchema, ";", cdGlobalIndividualCustomerTable,
+      CdGlobalIndividualCustomerCol, col("IS_ACTIVE_FLG") === 1)
 
-  val fctLoanAccountBalanceSchema = schemas.FctLoanAccountBalance.structType
-
-  val fctLoanAccountBalanceDF: DataFrame =
-    extractTable("FCT_LOAN_ACCOUNT_BALANCE", fctLoanAccountBalanceSchema, ";", "sources/fct_loan_account_balance.csv",
-      fctLoanAccountBalanceCol,
-      col("DELETED_FLG") =!= 1 && col("BALANCE_AMT") > 0)
-
-  val techLoanRepaymentScheduleSchema = schemas.TechLoanRepaymentSchedule.structType
+  val fctLoanAccountBalanceExtr: DataFrame =
+    extractTable("FCT_LOAN_ACCOUNT_BALANCE", fctLoanAccountBalanceSchema, ";", fctLoanAccountBalanceTable,
+      fctLoanAccountBalanceCol, col("DELETED_FLG") =!= 1 && col("BALANCE_AMT") > 0)
 
   val techLoanRepaymentScheduleDF: DataFrame =
     extractTable("TECH_LOAN_REPAYMENT_SCHEDULE", techLoanRepaymentScheduleSchema, ";",
-      "sources/tech_loan_repayment_schedule.csv"
-)
-
-  val cdInternalOrgDetailSchema = schemas.CdInternalOrgDetail.structType
+      "sources/tech_loan_repayment_schedule.csv")
 
   val cdInternalOrgDetailDF: DataFrame =
-    extractTable("CD_INTERNAL_ORG_DETAIL", cdInternalOrgDetailSchema, ";", "sources/cd_internal_org_detail.csv",
-      cdInternalOrgDetailCol,
-      col("IS_ACTIVE_FLG") === 1)
+    extractTable("CD_INTERNAL_ORG_DETAIL", cdInternalOrgDetailSchema, ";", cdInternalOrgDetailTable,
+      cdInternalOrgDetailCol, col("IS_ACTIVE_FLG") === 1)
 
   log.warn("Загрузка источников завершена")
 

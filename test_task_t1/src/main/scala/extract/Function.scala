@@ -8,6 +8,16 @@ import org.apache.log4j.{Level, Logger}
 
 class Function extends Logging with Connect{
 
+  /**
+   *
+   * @param table название таблицы
+   * @param schema схема
+   * @param delimiter разделитель аттрибутов
+   * @param source путь к файлу истонику
+   * @param cols выборка аттрибутов
+   * @param condition фильтрация
+   * @return Функция для загрузки данных из источника csv
+   */
   def extractTable(table: String,
                    schema: StructType,
                    delimiter: String = ";",

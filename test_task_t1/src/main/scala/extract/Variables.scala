@@ -2,9 +2,30 @@ package extract
 
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.functions._
+import schemas._
 
 object Variables {
 
+  // схемы данных
+  val cdAccountSchema = schemas.CdAccount.structType
+  val cdLoanAgreementSchema = schemas.CdLoanAgreement.structType
+  val cdAgreementXCustomerSchema = schemas.CdAgreementXCustomer.structType
+  val cdIndividualCustomerSchema = schemas.CdIndividualCustomer.structType
+  val CdGlobalIndividualCustomerSchema = schemas.CdGlobalIndividualCustomer.structType
+  val fctLoanAccountBalanceSchema = schemas.FctLoanAccountBalance.structType
+  val techLoanRepaymentScheduleSchema = schemas.TechLoanRepaymentSchedule.structType
+  val cdInternalOrgDetailSchema = schemas.CdInternalOrgDetail.structType
+
+    // путь к источникам данных
+  val cdAccountTable: String = "sources/cd_account.csv"
+  val cdLoanAgreementTable: String = "sources/cd_loan_agreement.csv"
+  val cdAgreementXCustomerTable: String = "sources/cd_agreement_x_customer.csv"
+  val cdIndividualCustomerTable: String = "sources/cd_individual_customer.csv"
+  val cdGlobalIndividualCustomerTable: String = "sources/cd_global_individual_customer.csv"
+  val fctLoanAccountBalanceTable: String = "sources/fct_loan_account_balance.csv"
+  val cdInternalOrgDetailTable: String = "sources/cd_internal_org_detail.csv"
+
+    // аттрибуты df
   val cdAccountCol: Seq[Column] = Seq(
     "ACCOUNT_RK",
     "ACCOUNT_NUM"
