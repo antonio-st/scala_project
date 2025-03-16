@@ -19,7 +19,7 @@ class Extract extends Function with Logging{
     logger.setLevel(Level.INFO)
 
   // аргументы необходимо при запуске jar передавать с ним, здесь объявлены для демонстрации работы
-  val args = Seq("--load-date", "2020")
+  val args = Seq("--load-date", "2020-12")
   val conf = new Parameters(args)
 
   log.warn(s"Получена дата ${conf.loadDate.apply()}")
@@ -50,13 +50,13 @@ class Extract extends Function with Logging{
   val fctLoanAccountBalanceExtr: DataFrame =
     extractTable("FCT_LOAN_ACCOUNT_BALANCE", fctLoanAccountBalanceSchema, ";", fctLoanAccountBalanceTable,
       fctLoanAccountBalanceCol, col("DELETED_FLG") =!= 1 && col("BALANCE_AMT") > 0)
-      .withColumn("TRANZACTION_DATE", year(to_date(col("PROCESSED_DTTM"))))
+      .withColumn("TRANZACTION_DATE", date_format(to_date(col("PROCESSED_DTTM")), "yyyy-MM"))
         .filter(col("TRANZACTION_DATE") === conf.loadDate.apply())
 
 
   val techLoanRepaymentScheduleDF: DataFrame =
     extractTable("TECH_LOAN_REPAYMENT_SCHEDULE", techLoanRepaymentScheduleSchema, ";",
-      "sources/tech_loan_repayment_schedule.csv")
+      techLoanRepaymentScheduleTable)
 
   val cdInternalOrgDetailDF: DataFrame =
     extractTable("CD_INTERNAL_ORG_DETAIL", cdInternalOrgDetailSchema, ";", cdInternalOrgDetailTable,

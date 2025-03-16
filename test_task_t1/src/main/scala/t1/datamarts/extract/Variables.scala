@@ -6,6 +6,9 @@ import schemas._
 
 object Variables {
 
+  val resultTable: String = "table/stg/credit"
+  val resultTableCsv: String = "table/stg/csv"
+
   // схемы данных
   val cdAccountSchema = schemas.CdAccount.structType
   val cdLoanAgreementSchema = schemas.CdLoanAgreement.structType
@@ -24,6 +27,7 @@ object Variables {
   val cdGlobalIndividualCustomerTable: String = "sources/cd_global_individual_customer.csv"
   val fctLoanAccountBalanceTable: String = "sources/fct_loan_account_balance.csv"
   val cdInternalOrgDetailTable: String = "sources/cd_internal_org_detail.csv"
+  val techLoanRepaymentScheduleTable: String = "sources/tech_loan_repayment_schedule.csv"
 
     // аттрибуты df
   val cdAccountCol: Seq[Column] = Seq(

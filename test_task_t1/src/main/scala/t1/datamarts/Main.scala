@@ -4,7 +4,7 @@ import org.apache.log4j.{Level, Logger}
 import org.apache.spark.internal.Logging
 import t1.datamarts.extract.Connect
 import t1.datamarts.processes.Processes._
-import t1.datamarts.transform.Transform
+import t1.datamarts.load.Load
 
 
 object Main extends Connect {
@@ -17,8 +17,11 @@ object Main extends Connect {
 
   def main(args: Array[String]): Unit = {
 
-    val start = new Transform
-    start.run()
+//    val start = new Transform
+//    start.run()
+
+    val start = new Load
+    start.load()
 
 //    fctLoanAccountBalanceProc.show()
 //    cdAccountProc.show()

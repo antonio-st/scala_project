@@ -16,8 +16,7 @@ class Transform extends Logging {
   logger.setLevel(Level.INFO)
 
   // аргументы необходимо при запуске jar передавать с ним, здесь объявлены для демонстрации работы
-  val args = Seq("--load-date", "2020")
-  val conf = new Parameters(args)
+
   val dl = new Extract()
 
   def run() = {
@@ -26,12 +25,26 @@ class Transform extends Logging {
     val sr11Sr13DF: DataFrame = getSr11Sr13(dl.fctLoanAccountBalanceExtr, dl.cdAccountDF, dl.cdLoanAgreementDF)
     log.warn("Готово")
 
+    val cols = sr11Sr13DF.columns
+    log.warn(s"${cols.foreach(x => println(x))}")
+
     log.warn("Расчет SR_15 и SR_17")
     val sr15Sr17DF: DataFrame = getSr15Sr17(sr11Sr13DF, dl.cdAgreementXCustomerDF, dl.cdInternalOrgDetailDF)
     log.warn("Готово")
-    sr15Sr17DF.show()
 
+    log.warn("Расчет SR_18, SR_19, SR_20")
+    val sr18Sr20DF: DataFrame = getSr18Sr20(sr15Sr17DF, dl.cdInternalOrgDetailDF, dl.techLoanRepaymentScheduleDF)
+    log.warn("Готово")
 
+    log.warn("Расчет SR_22, SR_23, SR_24")
+    val sr22Sr24DF: DataFrame = getSr22Sr24(sr18Sr20DF, dl.cdIndividualCustomerDF, dl.cdGlobalIndividualCustomerDF)
+    log.warn("Готово")
+
+    log.warn("Итоговый результат таблицы STG_CREDIT")
+    val result: DataFrame = getResult(sr22Sr24DF)
+    log.warn("Готово")
+
+    result
 
   }
 
@@ -50,7 +63,27 @@ object Transform {
     fctLoanAccountBalanceExtr.as("flab")
       .join(cdAccountDF.as("ca"), col("flab.account_rk") === col("ca.account_rk")
       && col("flab.account_num") === col("ca.account_num"))
-      .join(cdLoanAgreementDF.as("la"), Seq("agreement_rk"))
+      .join(cdLoanAgreementDF.as("la"), col("flab.agreement_rk") === col("la.agreement_rk"))
+      .select(
+        "flab.AGREEMENT_RK",
+        "flab.ACCOUNT_RK",
+        "flab.ACCOUNT_NUM",
+        "flab.BALANCE_AMT",
+        "flab.EFFECTIVE_FROM_DTTM",
+        "flab.EFFECTIVE_TO_DTTM",
+        "flab.IS_ACTIVE_FLG",
+        "flab.PROCESSED_DTTM",
+        "la.CONTRACT_NUM",
+        "la.OPEN_DT",
+        "la.LOAN_AMT",
+        "la.CREDIT_LIMIT_AMT",
+        "la.CURRENCY_ISO_CD",
+        "la.INTERNAL_ORG_ID",
+        "la.INIT_INTERNAL_ORG_ID",
+        "la.PRODUCT_OPERATIONAL_RK",
+        "la.CUSTOMER_RK",
+        "flab.TRANZACTION_DATE"
+      )
   }
 
   /**
@@ -63,7 +96,134 @@ object Transform {
     sr11Sr13DF.as("sr13")
       .join(cdAgreementXCustomerDF.as("axc"), col("sr13.agreement_rk") === col("axc.agreement_rk")
       && col("sr13.customer_rk") === col("axc.customer_rk"))
-      .join(cdInternalOrgDetailDF.as("iod"), Seq("internal_org_id"))
+      .join(cdInternalOrgDetailDF.as("iod"), col("sr13.internal_org_id") === col("iod.internal_org_id"))
+      .select(
+        "sr13.AGREEMENT_RK",
+        "sr13.ACCOUNT_RK",
+        "sr13.ACCOUNT_NUM",
+        "sr13.BALANCE_AMT",
+        "sr13.EFFECTIVE_FROM_DTTM",
+        "sr13.EFFECTIVE_TO_DTTM",
+        "sr13.IS_ACTIVE_FLG",
+        "sr13.PROCESSED_DTTM",
+        "sr13.CONTRACT_NUM",
+        "sr13.OPEN_DT",
+        "sr13.LOAN_AMT",
+        "sr13.CREDIT_LIMIT_AMT",
+        "sr13.CURRENCY_ISO_CD",
+        "sr13.INTERNAL_ORG_ID",
+        "sr13.INIT_INTERNAL_ORG_ID",
+        "sr13.PRODUCT_OPERATIONAL_RK",
+        "sr13.CUSTOMER_RK",
+        "iod.BRANCH_ID",
+        "iod.BRANCH_NM",
+        "iod.REGIONAL_OPER_OFFICE_ID",
+        "iod.REGIONAL_OPER_OFFICE_NM",
+        "iod.INTERNAL_ORG_NM",
+        "iod.ADDRESS",
+        "sr13.TRANZACTION_DATE"
+      )
+  }
+
+
+  /**
+   * @return Расчет SR_18 ,SR_19, SR_20
+   */
+  private def getSr18Sr20(sr15Sr17DF: DataFrame,
+                          cdInternalOrgDetailDF: DataFrame,
+                          techLoanRepaymentScheduleDF: DataFrame
+                         ): DataFrame = {
+  sr15Sr17DF.as("sr17")
+      .join(cdInternalOrgDetailDF.as("iod"), col("init_internal_org_id") === col("sr17.internal_org_id"), "left")
+      .join(techLoanRepaymentScheduleDF
+      .groupBy("agreement_rk")
+      .agg(
+        max("NEXT_PAYMENT_FROM_DT").as("NEXT_PAYMENT_FROM_DT"),
+        max("NEXT_MONTHLY_PAYMENT_AMT").as("NEXT_MONTHLY_PAYMENT_AMT")
+      )
+      .select(
+        col("AGREEMENT_RK"),
+        col("NEXT_PAYMENT_FROM_DT"),
+        col("NEXT_MONTHLY_PAYMENT_AMT")
+      ).as("sr19"), col("sr17.agreement_rk") === col("sr19.agreement_rk"), "left"
+      )
+      .select(
+        "sr17.AGREEMENT_RK",
+        "sr17.ACCOUNT_RK",
+        "sr17.ACCOUNT_NUM",
+        "sr17.BALANCE_AMT",
+        "sr17.EFFECTIVE_FROM_DTTM",
+        "sr17.EFFECTIVE_TO_DTTM",
+        "sr17.IS_ACTIVE_FLG",
+        "sr17.PROCESSED_DTTM",
+        "sr17.CONTRACT_NUM",
+        "sr17.OPEN_DT",
+        "sr17.LOAN_AMT",
+        "sr17.CREDIT_LIMIT_AMT",
+        "sr17.CURRENCY_ISO_CD",
+        "sr17.INTERNAL_ORG_ID",
+        "sr17.INIT_INTERNAL_ORG_ID",
+        "sr17.PRODUCT_OPERATIONAL_RK",
+        "sr17.CUSTOMER_RK",
+        "sr17.BRANCH_ID",
+        "sr17.BRANCH_NM",
+        "sr17.REGIONAL_OPER_OFFICE_ID",
+        "sr17.REGIONAL_OPER_OFFICE_NM",
+        "sr17.INTERNAL_ORG_NM",
+        "sr17.ADDRESS",
+        "sr19.NEXT_PAYMENT_FROM_DT",
+        "sr19.NEXT_MONTHLY_PAYMENT_AMT",
+        "sr17.TRANZACTION_DATE"
+      )
+  }
+
+  /**
+   * @return Расчет SR_22, SR_23, SR_24
+   */
+  private def getSr22Sr24(sr18Sr20DF: DataFrame,
+                          cdIndividualCustomerDF: DataFrame,
+                          cdGlobalIndividualCustomerDF: DataFrame
+                         ): DataFrame = {
+
+    sr18Sr20DF.as("sr20")
+      .join(cdIndividualCustomerDF.as("ic"), Seq("customer_rk"), "left")
+      .join(cdGlobalIndividualCustomerDF.as("gic"), col("ic.customer_global_rk") === col("customer_mdm_rk"))
+
+  }
+
+  /**
+   * @return Итоговый результат таблицы STG_CREDIT
+   */
+  private def getResult(sr22Sr24DF: DataFrame): DataFrame = {
+
+    sr22Sr24DF
+      .select(
+        col("CUSTOMER_MDM_ID").as("CUSTOMER_MDM_ID"), // глобальный ид клиента
+        col("CONTRACT_NUM").as("CONTRACT_NUM"), // номер контракта
+        col("LOAN_AMT").as("LOAN_AMT"), // сумма кредита
+        col("OPEN_DT").as("OPEN_DT"), // дата открытия договора
+        col("sr20.BRANCH_ID").as("TERBANK_ID_FILIAL_VTB"), // ид филиала
+        col("BRANCH_NM").as("TERBANK_NM_FILIAL_VTB"), // наименование филиала
+        col("REGIONAL_OPER_OFFICE_ID").as("BRANCH_ID_ROO_VTB"), // ид офиса
+        col("REGIONAL_OPER_OFFICE_NM").as("BRANCH_NM_ROO_VTB"), // наименование офиса
+        col("INTERNAL_ORG_ID").as("SUBBRANCH_NM_PODRAZD_SCHETA_VTB"), // ид подразделения счета
+        col("INTERNAL_ORG_NM").as("SUBBRANCH_ID_PODRAZD_SCHETA_VTB"), // наименование подразделения счета
+        col("INTERNAL_ORG_ID").as("BRANCHBANK_ID_PODRAZD_VYDACHI_VTB"), // ид отделения инициатора
+        col("INTERNAL_ORG_NM").as("BRANCHBANK_NM_PODRAZD_VYDACHI_VTB"), // наименование отделения инициатора
+        col("ADDRESS").as("BRANCHBANK_ADR_PODRAZD_VYDACHI_VTB"), // адрес отделения инициатора (!! ошибка в ТЗ, неверное поле ADRESS)
+        when(col("CURRENCY_ISO_CD") === "RUR", 810)
+        .when(col("CURRENCY_ISO_CD") === "USD", 840)
+        .when(col("CURRENCY_ISO_CD") === "EUR", 978)
+        .when(col("CURRENCY_ISO_CD") === "CHF", 756)
+        .when(col("CURRENCY_ISO_CD") === "JPY", 392)
+          .otherwise(lit(null)).as("CURRENCY") ,// валюта
+        substring(col("NEXT_PAYMENT_FROM_DT"), 9, 2).as("PAYMENT_DT"), // дата платежа значением атрибута
+        col("NEXT_MONTHLY_PAYMENT_AMT").as("PAYMENT_AMT"), // платеж по ОД
+        col("ACCOUNT_NUM").as("ACCOUNT_NUM"), // номер счета
+        col("BALANCE_AMT").as("BALANCE_AMT"), // остаток на счете
+        col("EFFECTIVE_FROM_DTTM").as("EFFECTIVE_FROM_DTTM"), // дата начала действия записи
+        col("TRANZACTION_DATE") // месяц/год инкремента
+      )
 
   }
 
