@@ -27,9 +27,6 @@ class Transform extends Logging {
     val sr11Sr13DF: DataFrame = getSr11Sr13(dl.fctLoanAccountBalanceExtr, dl.cdAccountDF, dl.cdLoanAgreementDF)
     log.warn("Готово")
 
-    val cols = sr11Sr13DF.columns
-    log.warn(s"${cols.foreach(x => println(x))}")
-
     log.warn("Расчет SR_15 и SR_17")
     val sr15Sr17DF: DataFrame = getSr15Sr17(sr11Sr13DF, dl.cdAgreementXCustomerDF, dl.cdInternalOrgDetailDF)
     log.warn("Готово")
