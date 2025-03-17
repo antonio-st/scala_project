@@ -4,7 +4,6 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.types.StructType
-import org.apache.log4j.{Level, Logger}
 
 class Function extends Logging with Connect{
 

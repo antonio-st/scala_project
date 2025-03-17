@@ -1,10 +1,8 @@
 package t1.datamarts
 
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.internal.Logging
 import t1.datamarts.extract.Connect
 import t1.datamarts.load.Load
-import t1.datamarts.Parameters
 
 
 object Main extends Connect {

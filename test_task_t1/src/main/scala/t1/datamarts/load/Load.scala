@@ -5,7 +5,6 @@ import org.apache.spark.sql.functions._
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.internal.Logging
 import t1.datamarts.extract.Connect
-import t1.datamarts.transform.Transform
 import t1.datamarts.processes.Processes
 
 class Load extends Logging with Connect{
