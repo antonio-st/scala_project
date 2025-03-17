@@ -7,12 +7,15 @@ import org.apache.spark.internal.Logging
 import t1.datamarts.extract.Connect
 import t1.datamarts.processes.Processes
 
+
+
 class Load extends Logging with Connect{
 
   // настройка логирования
   Logger.getRootLogger.setLevel(Level.WARN)
   val logger: Logger = Logger.getLogger(getClass.getName)
   logger.setLevel(Level.INFO)
+
 
   val transf = new Processes
   val resultDF: DataFrame = transf.processes()
@@ -22,7 +25,7 @@ class Load extends Logging with Connect{
         // Указываем, что нужно перезаписывать только рассчитанные партиции
     spark.conf.set("spark.sql.sources.partitionOverwriteMode", "dynamic")
 
-    log.warn(s"Запись результата orc в $resultTable")
+    log.warn(s"Запись результата orc в ${resultTable}")
 
     resultDF
       .write

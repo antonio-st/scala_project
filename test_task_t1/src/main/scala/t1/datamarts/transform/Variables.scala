@@ -23,7 +23,6 @@ object Variables {
     "la.INIT_INTERNAL_ORG_ID",
     "la.PRODUCT_OPERATIONAL_RK",
     "la.CUSTOMER_RK"
-//    "flab.TRANZACTION_DATE"
   ).map(col)
 
   val sr15Sr17Cols: Seq[Column] = Seq(
@@ -50,7 +49,6 @@ object Variables {
     "iod.REGIONAL_OPER_OFFICE_NM",
     "iod.INTERNAL_ORG_NM",
     "iod.ADDRESS"
-//    "sr13.TRANZACTION_DATE"
   ).map(col)
 
   val sr18Sr20Cols: Seq[Column] = Seq(
@@ -79,7 +77,6 @@ object Variables {
     "sr17.ADDRESS",
     "sr19.NEXT_PAYMENT_FROM_DT",
     "sr19.NEXT_MONTHLY_PAYMENT_AMT"
-//    "sr17.TRANZACTION_DATE"
   ).map(col)
 
 }

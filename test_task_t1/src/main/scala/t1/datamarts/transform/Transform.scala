@@ -17,8 +17,6 @@ class Transform extends Logging {
   val logger: Logger = Logger.getLogger(getClass.getName)
   logger.setLevel(Level.INFO)
 
-  // аргументы необходимо при запуске jar передавать с ним, здесь объявлены для демонстрации работы
-
   val dl = new Extract()
 
   def run() = {

@@ -7,7 +7,6 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion % "compile",
   "org.apache.spark" %% "spark-sql" % sparkVersion % "compile",
   "org.apache.spark" %% "spark-hive" % sparkVersion % "compile",
-  "org.apache.spark" %% "spark-graphx" % sparkVersion % "compile",
   "com.typesafe" % "config" % "1.4.2",
   "org.rogach" %% "scallop" % "4.1.0"
 )
