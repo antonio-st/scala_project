@@ -20,7 +20,7 @@ class Load extends Logging with Connect{
 
   def load() = {
 
-    // Указываем, что нужно перезаписывать только рассчитанные партиции
+        // Указываем, что нужно перезаписывать только рассчитанные партиции
     spark.conf.set("spark.sql.sources.partitionOverwriteMode", "dynamic")
 
     log.warn(s"Запись результата orc в $resultTable")
@@ -30,14 +30,53 @@ class Load extends Logging with Connect{
       .partitionBy("TRANZACTION_DATE")
       .mode(SaveMode.Overwrite)
       .option("compression", "snappy")
-//      .format("orc")
-//      .insertInto(resultTable)
       .orc(resultTable)
     log.warn("Готово")
 
-    log.warn(s"Запись результата csv в $resultTableCsv")
 
-    resultDF
+    log.warn("Проверка неактуальных данных (старше 5 лет)")
+    val actualDF: DataFrame =
+    spark
+      .read
+      .orc(resultTable)
+      .filter(to_date(col("PROCESSED_DTTM")) >= add_months(current_date(), -12 * 5))
+    log.warn("Готово")
+
+    log.warn(s"Запись актуального результата orc в $tempDir")
+    actualDF
+      .write
+      .partitionBy("TRANZACTION_DATE")
+      .mode(SaveMode.Overwrite)
+      .option("compression", "snappy")
+      .orc(tempDir)
+    log.warn("Готово")
+
+  log.warn(s"Читаем $tempDir")
+    val tempDF: DataFrame =  spark
+      .read
+      .orc(tempDir)
+    log.warn("Готово")
+
+    // перезаписываем все партиции
+    spark.conf.set("spark.sql.sources.partitionOverwriteMode", "static")
+
+    log.warn(s"Перезаписываем витрину $resultTable")
+        tempDF
+          .write
+      .partitionBy("TRANZACTION_DATE")
+      .mode(SaveMode.Overwrite)
+      .option("compression", "snappy")
+      .orc(resultTable)
+    log.warn("Готово")
+
+    log.warn(s"Очистка $tempDir")
+    val clearTemp = new Clear(tempDir)
+    log.warn("Готово")
+
+    log.warn(s"Запись актуального результата csv в $resultTableCsv")
+    spark
+      .read
+      .orc(resultTable)
       .coalesce(1)
       .write
       .option("header", "True")
@@ -54,8 +93,6 @@ class Load extends Logging with Connect{
       .show()
 
     log.warn("Готово")
-
-
 
   }
 }

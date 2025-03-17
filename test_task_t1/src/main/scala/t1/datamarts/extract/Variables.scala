@@ -8,6 +8,7 @@ object Variables {
 
   val resultTable: String = "table/stg/credit"
   val resultTableCsv: String = "table/stg/csv"
+  val tempDir: String = "table/stg/temp/"
 
   // схемы данных
   val cdAccountSchema = schemas.CdAccount.structType

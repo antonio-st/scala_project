@@ -2,13 +2,10 @@ package t1.datamarts.extract
 
 import org.apache.spark.sql._
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.types._
-import schemas._
 import Variables._
-import t1.datamarts.Parameters
+import t1.datamarts.Main._
 
 
 class Extract extends Function with Logging{
@@ -17,10 +14,6 @@ class Extract extends Function with Logging{
     Logger.getRootLogger.setLevel(Level.WARN)
     val logger: Logger = Logger.getLogger(getClass.getName)
     logger.setLevel(Level.INFO)
-
-  // аргументы необходимо при запуске jar передавать с ним, здесь объявлены для демонстрации работы
-  val args = Seq("--load-date", "2020-09")
-  val conf = new Parameters(args)
 
   log.warn(s"Получена дата ${conf.loadDate.apply()}")
 
